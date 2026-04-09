@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Lato', 'Helvetica Neue', sans-serif;
+    background-color: #fefcf7;
+    color: #141414;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+    letter-spacing: -0.01em;
+  }
+
+  h5, h6 {
+    font-family: 'Cormorant Garamond', 'Gill Sans', sans-serif;
+    letter-spacing: 0.05em;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    @apply inline-flex items-center gap-2 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-600 text-white px-8 py-3.5 font-body text-sm tracking-widest uppercase transition-all duration-300 hover:shadow-lg hover:shadow-gold-500/30 hover:scale-[1.02] active:scale-[0.98];
+    background-size: 200% auto;
+  }
+
+  .btn-outline-gold {
+    @apply inline-flex items-center gap-2 border border-gold-500 text-gold-600 px-8 py-3.5 font-body text-sm tracking-widest uppercase transition-all duration-300 hover:bg-gold-500 hover:text-white;
+  }
+
+  .section-label {
+    @apply font-body text-xs tracking-[0.3em] uppercase text-gold-600 mb-3;
+  }
+
+  .section-title {
+    @apply font-serif text-4xl md:text-5xl text-charcoal-900 leading-tight;
+  }
+
+  .card-glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/60 shadow-xl;
+  }
+
+  .gold-divider {
+    @apply w-16 h-px bg-gradient-to-r from-transparent via-gold-500 to-transparent mx-auto my-6;
+  }
+
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-600 via-gold-400 to-gold-600 bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-600 { animation-delay: 600ms; }
+  .animation-delay-800 { animation-delay: 800ms; }
+
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* Parallax base */
+.parallax {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f8f4ec;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9952a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a97820;
+}
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
