@@ -1,163 +1,263 @@
-import { useState } from 'react'
-import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Star, Send, CheckCircle } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { FeedbackItem } from '../lib/types'
 import ScrollReveal from '../components/ui/ScrollReveal'
 
-const categories = ['All', 'Rooms & Suites', 'Amenities', 'Dining', 'Nature']
-
-const images = [
-  { src: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Amenities', title: 'Infinity Pool', tall: false },
-  { src: 'https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Rooms & Suites', title: 'Heritage Room', tall: true },
-  { src: 'https://images.pexels.com/photos/2034335/pexels-photo-2034335.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/2034335/pexels-photo-2034335.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Amenities', title: 'Grand Lobby', tall: false },
-  { src: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Rooms & Suites', title: 'Lakeside Suite', tall: false },
-  { src: 'https://images.pexels.com/photos/1579253/pexels-photo-1579253.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/1579253/pexels-photo-1579253.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Rooms & Suites', title: 'Premium Room', tall: true },
-  { src: 'https://images.pexels.com/photos/189296/pexels-photo-189296.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/189296/pexels-photo-189296.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Amenities', title: 'Pool Terrace', tall: false },
-  { src: 'https://images.pexels.com/photos/2598638/pexels-photo-2598638.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/2598638/pexels-photo-2598638.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Amenities', title: 'Spa Sanctuary', tall: false },
-  { src: 'https://images.pexels.com/photos/1838554/pexels-photo-1838554.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/1838554/pexels-photo-1838554.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Rooms & Suites', title: 'Royal Villa', tall: true },
-  { src: 'https://images.pexels.com/photos/3225531/pexels-photo-3225531.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/3225531/pexels-photo-3225531.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Nature', title: 'Estate Gardens', tall: false },
-  { src: 'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Rooms & Suites', title: 'Classic Room', tall: false },
-  { src: 'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Dining', title: 'Fine Dining', tall: true },
-  { src: 'https://images.pexels.com/photos/237272/pexels-photo-237272.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/237272/pexels-photo-237272.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Amenities', title: 'Sunset Pool', tall: false },
-  { src: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Dining', title: 'Outdoor Dining', tall: false },
-  { src: 'https://images.pexels.com/photos/2373201/pexels-photo-2373201.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/2373201/pexels-photo-2373201.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Nature', title: 'Mountain Vista', tall: true },
-  { src: 'https://images.pexels.com/photos/1268871/pexels-photo-1268871.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/1268871/pexels-photo-1268871.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Nature', title: 'Forest Trail', tall: false },
-  { src: 'https://images.pexels.com/photos/3679602/pexels-photo-3679602.jpeg?auto=compress&cs=tinysrgb&w=1200', thumb: 'https://images.pexels.com/photos/3679602/pexels-photo-3679602.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Dining', title: 'Chef\'s Table', tall: false },
+const roomTypes = [
+  'Heritage Room', 'Signature Suite', 'Lakeside Suite', 'Garden Pavilion',
+  'Royal Villa', 'Presidential Suite', 'Other',
 ]
 
-export default function Gallery() {
-  const [activeCategory, setActiveCategory] = useState('All')
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+export default function Feedback() {
+  const [reviews, setReviews] = useState<FeedbackItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [hoverRating, setHoverRating] = useState(0)
 
-  const filtered = activeCategory === 'All' ? images : images.filter(img => img.category === activeCategory)
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    rating: 0,
+    room_type: '',
+    comment: '',
+  })
 
-  const openLightbox = (index: number) => setLightboxIndex(index)
-  const closeLightbox = () => setLightboxIndex(null)
+  useEffect(() => {
+    async function fetchReviews() {
+      const { data } = await supabase
+        .from('feedback')
+        .select('*')
+        .eq('approved', true)
+        .order('created_at', { ascending: false })
+      if (data) setReviews(data)
+      setLoading(false)
+    }
+    fetchReviews()
+  }, [])
 
-  const prev = () => {
-    if (lightboxIndex !== null) {
-      setLightboxIndex((lightboxIndex - 1 + filtered.length) % filtered.length)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (form.rating === 0) return
+    setSubmitting(true)
+    const { error } = await supabase.from('feedback').insert([{
+      name: form.name,
+      email: form.email,
+      rating: form.rating,
+      room_type: form.room_type,
+      comment: form.comment,
+    }])
+    setSubmitting(false)
+    if (!error) {
+      setSubmitted(true)
+      setForm({ name: '', email: '', rating: 0, room_type: '', comment: '' })
     }
   }
 
-  const next = () => {
-    if (lightboxIndex !== null) {
-      setLightboxIndex((lightboxIndex + 1) % filtered.length)
-    }
-  }
+  const avgRating = reviews.length
+    ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
+    : '5.0'
 
   return (
     <div className="pt-20">
       {/* Header */}
       <div className="relative py-28 px-6 bg-charcoal-900 overflow-hidden">
-        <img
-          src="https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=1920"
-          alt="Gallery"
-          className="absolute inset-0 w-full h-full object-cover opacity-25"
-        />
+        <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/2598638/pexels-photo-2598638.jpeg?auto=compress&cs=tinysrgb&w=1920')] bg-cover bg-center opacity-15" />
         <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <p className="font-body text-xs tracking-[0.4em] uppercase text-gold-400 mb-4">Visual Journey</p>
-          <h1 className="font-serif text-5xl md:text-6xl text-white mb-6">Gallery</h1>
+          <p className="font-body text-xs tracking-[0.4em] uppercase text-gold-400 mb-4">Guest Voices</p>
+          <h1 className="font-serif text-5xl md:text-6xl text-white mb-6">Reviews & Feedback</h1>
           <div className="w-16 h-px bg-gradient-to-r from-transparent via-gold-400 to-transparent mx-auto mb-6" />
-          <p className="font-body text-white/60 max-w-xl mx-auto text-sm leading-relaxed">
-            A glimpse into the world that awaits you at Serenova — through light, texture, and unforgettable moments.
-          </p>
+          <div className="flex items-center justify-center gap-3">
+            <span className="font-serif text-4xl text-gold-400">{avgRating}</span>
+            <div>
+              <div className="flex gap-1 mb-1">
+                {[1,2,3,4,5].map((i) => (
+                  <Star key={i} size={16} className="fill-gold-500 text-gold-500" />
+                ))}
+              </div>
+              <span className="font-body text-xs text-white/50 tracking-wider">
+                Based on {reviews.length} verified reviews
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Filter */}
-      <div className="sticky top-20 z-30 bg-ivory border-b border-charcoal-100 py-5 px-6 shadow-sm">
-        <div className="max-w-7xl mx-auto flex gap-3 overflow-x-auto scrollbar-hide justify-center">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`flex-shrink-0 font-body text-xs tracking-[0.2em] uppercase px-6 py-2.5 transition-all duration-200 border ${
-                activeCategory === cat
-                  ? 'bg-charcoal-900 text-white border-charcoal-900'
-                  : 'border-charcoal-200 text-charcoal-500 hover:border-gold-400 hover:text-gold-600'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Masonry Grid */}
-      <section className="py-12 px-6 bg-ivory">
+      <div className="py-20 px-6 bg-ivory">
         <div className="max-w-7xl mx-auto">
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
-            {filtered.map((img, i) => (
-              <ScrollReveal key={`${img.src}-${i}`} delay={i * 40} className="break-inside-avoid">
-                <div
-                  className={`relative overflow-hidden cursor-pointer group ${img.tall ? 'h-80' : 'h-56'}`}
-                  onClick={() => openLightbox(i)}
-                >
-                  <img
-                    src={img.thumb}
-                    alt={img.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-charcoal-900/0 group-hover:bg-charcoal-900/50 transition-all duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center">
-                      <ZoomIn size={24} className="text-white mx-auto mb-2" />
-                      <span className="font-body text-xs tracking-widest uppercase text-white">{img.title}</span>
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-charcoal-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span className="font-body text-xs text-white/70 tracking-wider">{img.category}</span>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            {/* Reviews List */}
+            <div className="lg:col-span-2">
+              <ScrollReveal>
+                <h2 className="font-serif text-3xl text-charcoal-900 mb-2">Guest Stories</h2>
+                <div className="w-10 h-px bg-gold-500 mb-8" />
               </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Lightbox */}
-      {lightboxIndex !== null && (
-        <div
-          className="fixed inset-0 z-50 bg-charcoal-900/95 flex items-center justify-center p-4"
-          onClick={closeLightbox}
-        >
-          <button
-            className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors z-10"
-            onClick={closeLightbox}
-          >
-            <X size={28} />
-          </button>
-          <button
-            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors z-10 bg-white/10 hover:bg-white/20 w-12 h-12 flex items-center justify-center"
-            onClick={(e) => { e.stopPropagation(); prev() }}
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <button
-            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors z-10 bg-white/10 hover:bg-white/20 w-12 h-12 flex items-center justify-center"
-            onClick={(e) => { e.stopPropagation(); next() }}
-          >
-            <ChevronRight size={24} />
-          </button>
-          <div
-            className="max-w-5xl w-full mx-12 md:mx-20"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={filtered[lightboxIndex].src}
-              alt={filtered[lightboxIndex].title}
-              className="w-full max-h-[80vh] object-contain"
-            />
-            <div className="mt-4 text-center">
-              <p className="font-serif text-lg text-white">{filtered[lightboxIndex].title}</p>
-              <p className="font-body text-xs tracking-wider uppercase text-white/40 mt-1">{filtered[lightboxIndex].category}</p>
+              {loading ? (
+                <div className="space-y-6">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="bg-white p-8 shadow-sm animate-pulse">
+                      <div className="h-4 bg-charcoal-100 rounded w-1/3 mb-3" />
+                      <div className="h-3 bg-charcoal-50 rounded w-full mb-2" />
+                      <div className="h-3 bg-charcoal-50 rounded w-5/6" />
+                    </div>
+                  ))}
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="bg-white p-12 text-center shadow-sm">
+                  <p className="font-serif text-xl text-charcoal-400">No reviews yet. Be the first to share!</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {reviews.map((review, i) => (
+                    <ScrollReveal key={review.id} delay={i * 80}>
+                      <div className="bg-white p-8 shadow-sm border-l-2 border-gold-400 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gold-100 flex items-center justify-center font-serif text-gold-600 text-lg">
+                              {review.name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-body text-sm font-bold text-charcoal-800">{review.name}</p>
+                              <p className="font-body text-xs text-charcoal-400">{review.room_type}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <div className="flex gap-0.5">
+                              {[1,2,3,4,5].map((s) => (
+                                <Star
+                                  key={s}
+                                  size={13}
+                                  className={s <= review.rating ? 'fill-gold-500 text-gold-500' : 'text-charcoal-200'}
+                                />
+                              ))}
+                            </div>
+                            <span className="font-body text-xs text-charcoal-300 mt-1">
+                              {new Date(review.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' })}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="font-serif text-base italic text-charcoal-700 leading-relaxed">"{review.comment}"</p>
+                      </div>
+                    </ScrollReveal>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="mt-3 text-center">
-              <p className="font-body text-xs text-white/30">{lightboxIndex + 1} / {filtered.length}</p>
+
+            {/* Submit Form */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-28">
+                <ScrollReveal>
+                  <div className="bg-white shadow-lg p-8">
+                    <h3 className="font-serif text-2xl text-charcoal-900 mb-1">Share Your Experience</h3>
+                    <div className="w-8 h-px bg-gold-400 mb-6" />
+
+                    {submitted ? (
+                      <div className="text-center py-8">
+                        <CheckCircle size={40} className="text-gold-500 mx-auto mb-4" />
+                        <p className="font-serif text-xl text-charcoal-800 mb-2">Thank You!</p>
+                        <p className="font-body text-sm text-charcoal-500 leading-relaxed">
+                          Your review has been submitted and will appear after our team reviews it.
+                        </p>
+                        <button
+                          onClick={() => setSubmitted(false)}
+                          className="mt-6 font-body text-xs tracking-[0.2em] uppercase text-gold-600 hover:underline"
+                        >
+                          Submit Another
+                        </button>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSubmit} className="space-y-5">
+                        <div>
+                          <label className="font-body text-xs tracking-wider uppercase text-charcoal-500 block mb-2">Your Name *</label>
+                          <input
+                            type="text"
+                            required
+                            value={form.name}
+                            onChange={e => setForm({ ...form, name: e.target.value })}
+                            className="w-full border border-charcoal-200 px-4 py-3 font-body text-sm text-charcoal-800 focus:outline-none focus:border-gold-400 transition-colors bg-ivory"
+                            placeholder="Full name"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-body text-xs tracking-wider uppercase text-charcoal-500 block mb-2">Email *</label>
+                          <input
+                            type="email"
+                            required
+                            value={form.email}
+                            onChange={e => setForm({ ...form, email: e.target.value })}
+                            className="w-full border border-charcoal-200 px-4 py-3 font-body text-sm text-charcoal-800 focus:outline-none focus:border-gold-400 transition-colors bg-ivory"
+                            placeholder="your@email.com"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-body text-xs tracking-wider uppercase text-charcoal-500 block mb-2">Room Type</label>
+                          <select
+                            value={form.room_type}
+                            onChange={e => setForm({ ...form, room_type: e.target.value })}
+                            className="w-full border border-charcoal-200 px-4 py-3 font-body text-sm text-charcoal-800 focus:outline-none focus:border-gold-400 transition-colors bg-ivory"
+                          >
+                            <option value="">Select room type</option>
+                            {roomTypes.map(r => <option key={r} value={r}>{r}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="font-body text-xs tracking-wider uppercase text-charcoal-500 block mb-2">Your Rating *</label>
+                          <div className="flex gap-2">
+                            {[1,2,3,4,5].map((s) => (
+                              <button
+                                key={s}
+                                type="button"
+                                onMouseEnter={() => setHoverRating(s)}
+                                onMouseLeave={() => setHoverRating(0)}
+                                onClick={() => setForm({ ...form, rating: s })}
+                                className="transition-transform hover:scale-110"
+                              >
+                                <Star
+                                  size={24}
+                                  className={`transition-colors ${
+                                    s <= (hoverRating || form.rating)
+                                      ? 'fill-gold-500 text-gold-500'
+                                      : 'text-charcoal-200'
+                                  }`}
+                                />
+                              </button>
+                            ))}
+                          </div>
+                          {form.rating === 0 && (
+                            <p className="font-body text-xs text-charcoal-400 mt-1">Please select a rating</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="font-body text-xs tracking-wider uppercase text-charcoal-500 block mb-2">Your Review *</label>
+                          <textarea
+                            required
+                            rows={4}
+                            value={form.comment}
+                            onChange={e => setForm({ ...form, comment: e.target.value })}
+                            className="w-full border border-charcoal-200 px-4 py-3 font-body text-sm text-charcoal-800 focus:outline-none focus:border-gold-400 transition-colors resize-none bg-ivory"
+                            placeholder="Share your experience at Serenova..."
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={submitting || form.rating === 0}
+                          className="w-full flex items-center justify-center gap-2 bg-gold-500 text-charcoal-900 font-body text-xs tracking-[0.2em] uppercase py-4 hover:bg-gold-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {submitting ? 'Submitting...' : 'Submit Review'}
+                          <Send size={13} />
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </ScrollReveal>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
-
